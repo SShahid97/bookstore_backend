@@ -4,7 +4,7 @@ const Books = require("../models/book");
 const verify = require("./verifyToken");
 
 
-//Handling POST Request only admin can create a book
+//Handling POST Request only admin can add a book
 router.post("/", verify, async (req, res) => {
     if (req.user.role == "admin") {
         const bookCollection = new Books(
@@ -14,6 +14,7 @@ router.post("/", verify, async (req, res) => {
                 book_author: req.body.book_author,
                 book_image: req.body.book_image,
                 price: req.body.price,
+                discount:req.body.discount,
                 category: req.body.category,
                 book_description: req.body.book_description
             });
@@ -105,7 +106,7 @@ router.get("/:_id", async (req, res) => {
     } catch (err) {
         res.status(400).send(err);
     }
-    
+
 });
 
 module.exports = router;
