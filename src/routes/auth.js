@@ -9,12 +9,12 @@ router.post("/register", async(req, res)=>{
     // Validation
     const {error} = registerValidation(req.body);
     if (error)
-        return res.status(400).send(error.details[0].message);
+        return res.status(400).send({message:error.details[0].message});
     
     //Checking if the user already exists  
     const emailExist = await User.findOne({email:req.body.email})
     if(emailExist) 
-        return res.status(400).send("Email already exists");
+        return res.status(400).send({message: "Email already exists"});
     
     //Hash the password
     const salt = await bcrypt.genSalt(10);
@@ -45,12 +45,12 @@ router.post("/login",async(req,res)=>{
     // Validation
     const {error} = loginValidation(req.body);
     if (error)
-        return res.status(400).send(error.details[0].message);
+        return res.status(400).send({message:error.details[0].message});
     
     //Checking if the user exists  
     const user = await User.findOne({email:req.body.email})
     if(!user) 
-        return res.status(400).send("Email doesn't exist");    
+        return res.status(400).send({message:"Email doesn't exist"});    
     
     // Checking if the password is correct or not
     const validPassword = await bcrypt.compare(req.body.password,user.password);

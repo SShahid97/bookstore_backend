@@ -7,7 +7,7 @@ dotenv.config();
 const authRoute = require("./routes/auth");
 const bookRoute = require("./routes/books");
 const cartRoute = require("./routes/cart");
-const postRoute = require("./routes/posts");
+const uploadRoute = require("./routes/upload");
 //import db connection file
 require("./db/connection");
 
@@ -25,7 +25,9 @@ app.use(express.json());
 app.use("/api/books",bookRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/user",authRoute);
-app.use("/api/posts", postRoute);
+app.use("/api/upload",uploadRoute);
+
+
 
 app.listen(port,()=>{
     console.log(`Server listening at port: ${port}`);
