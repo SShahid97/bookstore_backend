@@ -8,6 +8,7 @@ const authRoute = require("./routes/auth");
 const bookRoute = require("./routes/books");
 const cartRoute = require("./routes/cart");
 const uploadRoute = require("./routes/upload");
+const reviewRoute = require("./routes/reviews");
 //import db connection file
 require("./db/connection");
 
@@ -26,6 +27,7 @@ app.use("/api/books",bookRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/user",authRoute);
 app.use("/api/upload",uploadRoute);
+app.use("/api/reviews",reviewRoute);
 
 
 

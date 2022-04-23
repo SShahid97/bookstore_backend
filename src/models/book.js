@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 const bookSchema = new mongoose.Schema({    
     book_code:{ 
         type:String,
-        required:true
-        // unique:true
+        required:true,
+        unique:true
     },
     book_name:{
         type:String,
@@ -20,6 +20,14 @@ const bookSchema = new mongoose.Schema({
     },
     price: {
         type: Number,
+        required:true
+    },
+    total_count:{
+        type:Number,
+        required:true
+    },
+    count_in_stock:{
+        type:Number,
         required:true
     },
     discount:{

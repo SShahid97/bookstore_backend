@@ -4,13 +4,24 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {registerValidation, loginValidation} = require('../validation')
 
+
+//Handling GET Request also getting data based on category
+router.get("/", async (req, res) => {
+    try {
+        const  users = await User.find({});  //find all
+        res.send(users);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
+
 // Register Route
 router.post("/register", async(req, res)=>{
     // Validation
     const {error} = registerValidation(req.body);
     if (error)
-        return res.status(400).send({message:error.details[0].message});
-    
+        return res.status(400).send(error.details[0].message);
+        // {message:error.details[0].message}
     //Checking if the user already exists  
     const emailExist = await User.findOne({email:req.body.email})
     if(emailExist) 

@@ -15,6 +15,8 @@ router.post("/", verify, async (req, res) => {
                 book_image: req.body.book_image,
                 price: req.body.price,
                 discount:req.body.discount,
+                total_count:req.body.total_count,
+                count_in_stock:req.body.count_in_stock,
                 category: req.body.category,
                 book_description: req.body.book_description
             });
