@@ -5,11 +5,15 @@ const jwt = require('jsonwebtoken');
 const {registerValidation, loginValidation} = require('../validation')
 
 
-//Handling GET Request also getting data based on category
+//Handling GET Request 
 router.get("/", async (req, res) => {
     try {
-        const  users = await User.find({});  //find all
-        res.send(users);
+        const users = await User.find({});  //find all
+        if(users.length > 0){
+            res.send(users);
+        }else{
+            res.status(204).send();
+        }
     } catch (err) {
         res.status(400).send(err);
     }
@@ -25,7 +29,7 @@ router.post("/register", async(req, res)=>{
     //Checking if the user already exists  
     const emailExist = await User.findOne({email:req.body.email})
     if(emailExist) 
-        return res.status(400).send({message: "Email already exists"});
+        return res.status(409).send({message: "Email already exists"});
     
     //Hash the password
     const salt = await bcrypt.genSalt(10);
@@ -61,12 +65,12 @@ router.post("/login",async(req,res)=>{
     //Checking if the user exists  
     const user = await User.findOne({email:req.body.email})
     if(!user) 
-        return res.status(400).send({message:"Email doesn't exist"});    
+        return res.status(204).send();    
     
     // Checking if the password is correct or not
     const validPassword = await bcrypt.compare(req.body.password,user.password);
     if (!validPassword)
-        return res.status(400).send("Invalid password");
+        return res.status(401).send({message:"Invalid password"});
 
     // Create and assign a token
     const token =  jwt.sign({_id:user._id},process.env.TOKEN_SECRET);    //,{ expiresIn: '60s' } 1d, 20h..

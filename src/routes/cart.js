@@ -6,7 +6,7 @@ const verify = require("./verifyToken");
 
 
 // handles inserting a cart item
-router.post("/",verify, async (req, res) => {
+router.post("/", async (req, res) => {
         const cartCollection = new Cart(
             {
                 user_id: req.body.user_id,
@@ -24,50 +24,64 @@ router.post("/",verify, async (req, res) => {
 });
 
 //Handling GET Request for individual based on id
-router.get("/:_id",verify, async (req, res) => {
+router.get("/:_id", async (req, res) => {
     try {
         const book_ids=[];
         const _id = req.params._id;
         const CartItems = await Cart.find({ user_id: _id });
-        
-        // pushing ids of books for a specific user from cart collection into an array
-        CartItems.forEach((item)=>{
-            book_ids.push(item.book_id);
-        });
+        if(CartItems.length>0){
+            // pushing ids of books for a specific user from cart collection into an array
+            CartItems.forEach((item)=>{
+                book_ids.push(item.book_id);
+            });
 
-        // getting books from the book collection based on the books id array
-        const books = await Book.find({ _id: { $in: book_ids }});
+            // getting books from the book collection based on the books id array
+            const books = await Book.find({ _id: { $in: book_ids }});
 
-        // adding the returned book items to each object in cart response  
-        CartItems.forEach((item)=>{
-            for(let i=0; i<books.length; i++){
-                if(String(item.book_id) == String(books[i]._id)){
-                    // adds a new key value pair (book:{}) to the CartItems object
-                    item.set( "book",books[i], { strict: false });
+            // adding the returned book items to each object in cart response  
+            CartItems.forEach((item)=>{
+                for(let i=0; i<books.length; i++){
+                    if(String(item.book_id) == String(books[i]._id)){
+                        // adds a new key value pair (book:{}) to the CartItems object
+                        item.set( "book",books[i], { strict: false });
 
-                    // deletes "book_id" key from the CartItems object
-                    item.set('book_id', undefined, {strict: false});
-                    break;
+                        // deletes "book_id" key from the CartItems object
+                        item.set('book_id', undefined, {strict: false});
+                        break;
+                    }
                 }
-            }
-        })
-        // console.log(CartItems.length); 
-        res.send(CartItems);
-        // if(CartItems.length==0){
-        //     res.status(204).send({message:"Your Cart is Empty"});       
-        // }else{
-        //     res.status(200).send(CartItems);
-        // }
+            })
+            res.send(CartItems);
+        }else{
+            res.status(204).send();
+        }
         
     } catch (err) {
         res.status(400).send(err);
     }
 });
 
+
+router.delete("/whole/:userID", async(req, res)=>{
+    try{
+        const userID =  req.params.userID;
+        const deletedCart = await Cart.deleteMany( { user_id : userID } );
+        if(deletedCart){
+            res.send({message:"Cart Deleted Successfully"});
+        }else{
+            res.send({message:"No Item found with the given id"});
+        }  
+        console.log(userID);
+    }catch(err){
+        res.status(500).send(err);
+    }
+})
+
 // Handling DELETE Request for individual record
 router.delete("/:_id",verify,async (req,res)=>{
     try{
-        const _id = req.params._id
+        const _id = req.params._id;
+        console.log(req.params)
         const deletedCartItem = await Cart.findByIdAndDelete(_id);
         
         if(deletedCartItem){
@@ -79,6 +93,7 @@ router.delete("/:_id",verify,async (req,res)=>{
         res.status(500).send(err);
     }
 });
+
 
 // Handling UPDATE (PATCH, put)
 router.patch("/:_id",verify,async (req,res)=>{

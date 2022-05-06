@@ -9,6 +9,11 @@ const bookRoute = require("./routes/books");
 const cartRoute = require("./routes/cart");
 const uploadRoute = require("./routes/upload");
 const reviewRoute = require("./routes/reviews");
+const addressRoute = require("./routes/address");
+const orderRoute = require("./routes/order");
+const pincodeRoute = require("./routes/pincode");
+const stockRoute = require("./routes/stock");
+
 //import db connection file
 require("./db/connection");
 
@@ -28,6 +33,10 @@ app.use("/api/cart", cartRoute);
 app.use("/api/user",authRoute);
 app.use("/api/upload",uploadRoute);
 app.use("/api/reviews",reviewRoute);
+app.use("/api/address",addressRoute);
+app.use("/api/order",orderRoute);
+app.use("/api/pincode",pincodeRoute);
+app.use("/api/stock",stockRoute);
 
 
 

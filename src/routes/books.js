@@ -15,8 +15,6 @@ router.post("/", verify, async (req, res) => {
                 book_image: req.body.book_image,
                 price: req.body.price,
                 discount:req.body.discount,
-                total_count:req.body.total_count,
-                count_in_stock:req.body.count_in_stock,
                 category: req.body.category,
                 book_description: req.body.book_description
             });
@@ -53,7 +51,7 @@ router.delete("/:_id",verify,async (req,res)=>{
         if(deletedBook){
             res.send({message:"Book Deleted"});
         }else{
-            res.send({message:"No book found with the given id"});
+            res.status(204).send();
         }
         
     }catch(err){
@@ -67,11 +65,18 @@ router.get("/", async (req, res) => {
     try {
         let books;
         if (category) {
-            books = await Books.find({ category: category })
+            books = await Books.find({ category: category });
+            // console.log(books);
+            if(books.length === 0){
+                res.status(204).send();
+            }else{
+                res.send(books);
+            }
         } else {
             books = await Books.find({});
+            res.send(books);
         }
-        res.send(books);
+        
     } catch (err) {
         res.status(400).send(err);
     }
@@ -87,8 +92,13 @@ router.get("/search", async (req, res) => {
                 $or: [{ book_name: { $regex: searched, $options: 'i' } },
                 { book_description: { $regex: searched, $options: 'i' } },
                 { book_author: { $regex: searched, $options: 'i' } }]
-            })
-        res.send(searchedBooks);
+            });
+            // console.log(searchedBooks);
+            if(searchedBooks.length === 0){
+                res.status(204).send();
+            }else {
+                res.send(searchedBooks);
+            }
     } catch (err) {
         res.status(400).send(err);
     }
@@ -98,11 +108,12 @@ router.get("/search", async (req, res) => {
 router.get("/:_id", async (req, res) => {
     try {
         const _id = req.params._id;
-        const getBook = await Books.findById(_id);
-        if(getBook){
-            res.send(getBook);
+        const bookDetails = await Books.findById(_id);
+        // console.log(bookDetails);
+        if(bookDetails !== null){
+            res.send(bookDetails);
         }else{
-            res.send("No book found with the given id");
+            res.status(204).send();
         }
         
     } catch (err) {
