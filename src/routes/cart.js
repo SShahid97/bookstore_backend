@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
 });
 
 //Handling GET Request for individual based on id
-router.get("/:_id", async (req, res) => {
+router.get("/:_id", verify, async (req, res) => {
     try {
         const book_ids=[];
         const _id = req.params._id;

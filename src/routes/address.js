@@ -25,14 +25,31 @@ router.post("/",verify, async (req, res) => {
 });
 
 //Handling GET Request for individual based on id
-router.get("/:_id",verify, async (req, res) => {
+router.get("/:_id",verify,async (req, res) => {
     try {
         const _id = req.params._id;
         const returnedAddress = await Address.find({user_id:_id});
-        if(returnedAddress){
-            res.send(returnedAddress);
+        if(returnedAddress.length > 0){
+            res.send(returnedAddress[0]);
         }else{
-            res.send("No Address found");
+            res.status(204).send();
+        }
+        
+    } catch (err) {
+        res.status(400).send(err);
+    }
+
+});
+
+//Deleting Address
+router.delete("/:_id",verify, async (req, res) => {
+    try {
+        const _id = req.params._id;
+        const deleteAddress = await Address.findByIdAndDelete(_id);
+        if(deleteAddress){
+            res.send({message:"Address Deleted Successfully"});
+        }else{
+            res.status(204).send();
         }
         
     } catch (err) {

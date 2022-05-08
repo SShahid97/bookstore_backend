@@ -26,7 +26,10 @@ const port = process.env.PORT || 5000;
 //Middleware
 // Allows to access json format data sent from client
 app.use(express.json());
-
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', '*');
+//     next();
+// });
 // Routes middleware
 app.use("/api/books",bookRoute);
 app.use("/api/cart", cartRoute);
@@ -41,6 +44,6 @@ app.use("/api/stock",stockRoute);
 
 
 app.listen(port,()=>{
-    console.log(`Server listening at port: ${port}`);
+    console.log(`Server listening at port`);
 });
 
