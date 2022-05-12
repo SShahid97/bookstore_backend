@@ -5,7 +5,7 @@
 /bookstore_frontend
 /.pnp
 .pnp.js
-/.env
+.env
 
 # testing
 /coverage

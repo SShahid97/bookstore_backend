@@ -52,8 +52,7 @@ router.delete("/:_id",verify,async (req,res)=>{
             res.send({message:"Book Deleted"});
         }else{
             res.status(204).send();
-        }
-        
+        } 
     }catch(err){
         res.status(500).send(err);
     }
@@ -67,14 +66,18 @@ router.get("/", async (req, res) => {
         if (category) {
             books = await Books.find({ category: category });
             // console.log(books);
-            if(books.length === 0){
-                res.status(204).send();
-            }else{
+            if(books.length > 0){
                 res.send(books);
+            }else{
+                res.status(204).send();
             }
         } else {
             books = await Books.find({});
-            res.send(books);
+            if(books.length>0){
+                res.send(books);
+            }else{
+                res.status(204).send();
+            }
         }
         
     } catch (err) {

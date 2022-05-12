@@ -13,6 +13,7 @@ const addressRoute = require("./routes/address");
 const orderRoute = require("./routes/order");
 const pincodeRoute = require("./routes/pincode");
 const stockRoute = require("./routes/stock");
+const wishlistRoute = require("./routes/wishlist");
 
 //import db connection file
 require("./db/connection");
@@ -40,6 +41,7 @@ app.use("/api/address",addressRoute);
 app.use("/api/order",orderRoute);
 app.use("/api/pincode",pincodeRoute);
 app.use("/api/stock",stockRoute);
+app.use("/api/wishlist",wishlistRoute);
 
 
 

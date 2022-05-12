@@ -6,7 +6,7 @@ const verify = require("./verifyToken");
 
 
 // handles inserting a cart item
-router.post("/", async (req, res) => {
+router.post("/",verify, async (req, res) => {
         const cartCollection = new Cart(
             {
                 user_id: req.body.user_id,

@@ -14,6 +14,7 @@ router.post("/",verify, async (req, res) => {
            shipping_charges:req.body.shipping_charges,
            payment_status:req.body.payment_status,
            payment_method:req.body.payment_method,
+           delivery_status:req.body.delivery_status,
            order:req.body.order
         });
         // console.log(orderCollection);
@@ -30,7 +31,7 @@ router.get("/search",verify, async (req, res) => {
     try {
         const userId = req.query.user_id;
         console.log(userId);
-        const returnedOrders = await Order.find({user_id:userId});
+        const returnedOrders = await Order.find({user_id:userId}).sort({date:-1});
         // console.log(returnedOrders);
         if(returnedOrders.length>0){
             let  book_ids = [];
@@ -68,7 +69,6 @@ router.get("/search",verify, async (req, res) => {
     } catch (err) {
         res.status(400).send(err);
     }
-
 });
 
 // handling search keyword (Order Id)

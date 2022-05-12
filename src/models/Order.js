@@ -21,6 +21,10 @@ const orderSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    delivery_status:{
+        type:String,
+        required:true
+    },
     order:[
         {
             book_id:{
