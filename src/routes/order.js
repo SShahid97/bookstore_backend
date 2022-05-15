@@ -98,7 +98,21 @@ router.get("/:_id",async(req, res)=>{
     }catch(err){
         res.status(400).send(err);
     }
-})
+});
+
+
+// Handling UPDATE (PATCH, put) Request for individual record
+router.patch("/:_id",verify,async (req,res)=>{
+    try{
+        const _id = req.params._id
+        const updatedOrder = await Order.findByIdAndUpdate(_id,req.body,{
+            new:true
+        });
+        res.send(updatedOrder);
+    }catch(err){
+        res.status(400).send(err);
+    }
+});
 
 
 module.exports = router;

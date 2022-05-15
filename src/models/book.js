@@ -33,7 +33,11 @@ const bookSchema = new mongoose.Schema({
         type: String,
         required:true
     }
-});
+},
+{
+    timestamps: true
+}
+);
 
 
 // Creating Collection 

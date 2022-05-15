@@ -8,7 +8,7 @@
     "start": "nodemon src/index.js",
     "dev": "nodemon src/index.js"
   },
-  "author": "Shahid",
+  "author": "Shahid", 
   "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^17.1.1",

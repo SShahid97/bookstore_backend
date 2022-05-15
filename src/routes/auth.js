@@ -2,11 +2,12 @@ const router = require("express").Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const verify = require("./verifyToken");
 const {registerValidation, loginValidation} = require('../validation')
 
 
 //Handling GET Request 
-router.get("/", async (req, res) => {
+router.get("/",verify, async (req, res) => {
     try {
         const users = await User.find({});  //find all
         if(users.length > 0){
@@ -87,4 +88,62 @@ router.post("/login",async(req,res)=>{
     // if everything is ok
     // res.send("Successfully logged in");
 });
+
+
+// Delete the user
+router.delete("/:_id",verify,async (req,res)=>{
+    try{
+        const _id = req.params._id;
+        // console.log(req.params)
+        const deletedUser= await User.findByIdAndDelete(_id);
+        
+        if(deletedUser){
+            res.send({message:"User Deleted"});
+        }else{
+            res.status(204).send();
+        }    
+    }catch(err){
+        res.status(500).send(err);
+    }
+});
+
+// verify password
+router.post("/verifypassword",verify,async(req,res)=>{
+    try{
+         //Checking if the user exists  
+        const user = await User.findOne({email:req.body.email});
+         // Checking if the password is correct or not
+        const validPassword = await bcrypt.compare(req.body.password,user.password);
+        if (!validPassword){
+            return res.status(401).send({message:"Wrong Password"});
+        }else{
+            res.status(200).send({message:"Correct Password"})
+        }
+    }catch(err){
+        res.status(400).send(err);
+    }
+});
+
+router.patch("/:_id",  async(req,res)=>{
+    try{
+        const _id = req.params._id;
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await  bcrypt.hash(req.body.password, salt);
+        const updatedPassword = await User.findByIdAndUpdate(_id,{
+            password:hashedPassword
+        },{ 
+             new:true
+        });
+        if(updatedPassword){
+            console.log(updatedPassword);
+             res.send({message:"Password Changed Successfully"});
+        }else{
+            res.status(204).send();
+        }
+    }catch(err){
+        return err;
+    }
+})
+
+
 module.exports = router;

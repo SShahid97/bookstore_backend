@@ -1,13 +1,10 @@
 const mongoose = require('mongoose');
 
 const stockSchema = new mongoose.Schema({
-    book_id:{
-        type:String,
-        required:true
-    },
     book_code:{
         type:String,
-        required:true
+        required:true,
+        unique:true
     },
     total_count:{
         type:Number,
@@ -17,7 +14,10 @@ const stockSchema = new mongoose.Schema({
         type:Number,
         required:true
     }
-     
-});
+},
+    {
+        timestamps: true
+    }
+);
 
 module.exports = mongoose.model('Stock',stockSchema);

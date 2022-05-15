@@ -46,6 +46,6 @@ app.use("/api/wishlist",wishlistRoute);
 
 
 app.listen(port,()=>{
-    console.log(`Server listening at port`);
+    console.log(`Server listening at port`,port);
 });
 

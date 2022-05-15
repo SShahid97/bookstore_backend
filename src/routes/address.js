@@ -16,9 +16,13 @@ router.post("/",verify, async (req, res) => {
            address:req.body.address
         });
     try {
-        console.log(addressCollection);
+        // console.log(addressCollection);
         const insertedAddress = await addressCollection.save();
-        res.status(201).send(insertedAddress);
+        if(insertedAddress){
+            res.status(201).send(insertedAddress);
+        }else{
+            res.status(204).send();
+        }
     } catch (err) {
         res.status(400).send(err);
     }
@@ -38,7 +42,6 @@ router.get("/:_id",verify,async (req, res) => {
     } catch (err) {
         res.status(400).send(err);
     }
-
 });
 
 //Deleting Address
@@ -48,6 +51,25 @@ router.delete("/:_id",verify, async (req, res) => {
         const deleteAddress = await Address.findByIdAndDelete(_id);
         if(deleteAddress){
             res.send({message:"Address Deleted Successfully"});
+        }else{
+            res.status(204).send();
+        }
+        
+    } catch (err) {
+        res.status(400).send(err);
+    }
+
+});
+
+//Update Address
+router.patch("/:_id",verify, async (req, res) => {
+    try {
+        const _id = req.params._id;
+        const updatedAddress = await Address.findByIdAndUpdate(_id,req.body,{
+            new:true
+        });
+        if(updatedAddress){
+            res.send({message:"Address Updated Successfully"});
         }else{
             res.status(204).send();
         }

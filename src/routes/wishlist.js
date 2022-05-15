@@ -8,7 +8,7 @@ const Stock = require("../models/Stock");
 
 // handles inserting a cart item
 // verify
-router.post("/", async (req, res) => {
+router.post("/",verify, async (req, res) => {
         const wishlistCollection = new Wishlist(
             {
                 user_id: req.body.user_id,
@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
 
 // verify,
 //Handling GET Request for individual based on id
-router.get("/:_id",  async (req, res) => {
+router.get("/:_id", verify, async (req, res) => {
     try {
         let book_ids=[];
         // let stockDetails = [];
@@ -69,7 +69,7 @@ router.get("/:_id",  async (req, res) => {
 
 // Handling DELETE Request for individual record
 // verify,
-router.delete("/:_id",async (req,res)=>{
+router.delete("/:_id",verify,async (req,res)=>{
     try{
         const _id = req.params._id;
         // console.log(req.params)

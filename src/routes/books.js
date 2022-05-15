@@ -1,11 +1,12 @@
 const express = require("express");
 const router = new express.Router();
 const Books = require("../models/book");
+const Reviews = require("../models/Review");
 const verify = require("./verifyToken");
 
 
 //Handling POST Request only admin can add a book
-router.post("/", verify, async (req, res) => {
+router.post("/",verify, async (req, res) => {
     if (req.user.role == "admin") {
         const bookCollection = new Books(
             {
@@ -21,9 +22,17 @@ router.post("/", verify, async (req, res) => {
         try {
             // console.log(bookCollection);
             const insertedBook = await bookCollection.save();
-            res.status(201).send(insertedBook);
+            if(insertedBook){
+                res.status(201).send(insertedBook);
+            }else{
+                res.status(204).send();
+            }
         } catch (err) {
-            res.status(400).send(err);
+            if(err.errors){
+                res.status(400).send(err);
+            }else{
+                res.status(422).send({message:"Book Code Must be Unique"});
+            }
         }
     }else{
         res.status(403).send("Access Denied");
@@ -67,6 +76,39 @@ router.get("/", async (req, res) => {
             books = await Books.find({ category: category });
             // console.log(books);
             if(books.length > 0){
+                let book_ids=[];
+                books.forEach((book)=>{
+                    book_ids.push(String(book._id));
+                });
+                // console.log(book_ids);
+                const reviews = await Reviews.find({ book_id: { $in: book_ids }},
+                    {
+                        user_id:0,
+                        review:0,
+                        date:0, 
+                        __v:0,
+                        _id:0
+                    });
+                // console.log(reviews)             
+                for(let i=0; i<books.length; i++){
+                    let sum=0;
+                    let review_count=0;
+                    for(let j=0; j<reviews.length; j++){
+                        if(books[i]._id == reviews[j].book_id){
+                            sum=sum+reviews[j].rating;
+                            review_count++;
+                        }else{
+                            continue;
+                        }
+                    }
+                    let ratingAvg=0;
+                    if(sum != 0){
+                        ratingAvg=sum/review_count;
+                        ratingAvg = ratingAvg.toFixed(1);
+                        ratingAvg = Number(ratingAvg); 
+                    }
+                    books[i].set( "rating",ratingAvg, { strict: false });
+                }
                 res.send(books);
             }else{
                 res.status(204).send();
@@ -85,6 +127,9 @@ router.get("/", async (req, res) => {
     }
 });
 
+const AttachReview = (books)=>{
+
+}
 //Handling GET Request also getting data based on category
 router.get("/search", async (req, res) => {
     const searched = req.query.search;
