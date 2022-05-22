@@ -4,6 +4,48 @@ const Order = require("../models/Order");
 const Book = require("../models/book");
 const verify = require("./verifyToken");
 
+// Get All orders
+router.get("/",verify,async(req,res)=>{
+    try{
+        const  orders = await Order.find({}).sort({date:1});
+        if(orders.length>0){
+            let  book_ids = [];
+            for(let i=0; i<orders.length; i++){
+                let indecies=[];
+                orders[i].order.forEach((bookInfo)=>{
+                    indecies.push(bookInfo.book_id);
+                })
+                book_ids.push(indecies);
+            }
+            // console.log(book_ids);
+
+            let books=[];
+            for(let i=0; i<book_ids.length; i++){
+                    let ids = book_ids[i];
+                let book = await Book.find({ _id: { $in: ids }});
+                books.push(book); 
+            }
+            // console.log("Books ", books);
+            
+            for(let i=0; i<orders.length; i++){
+                orders[i].order.forEach((bookInfo,index)=>{
+                    // console.log(bookInfo);
+                    // adding book in place of book_id
+                    bookInfo.set( "book",books[i][index], { strict: false });
+                    
+                    // Deleting book_id and id
+                    bookInfo.set('book_id', undefined, {strict: false});
+                })
+            }
+            res.send(orders);
+        }else{
+            res.status(204).send();
+        }
+    }catch(err){
+        res.status(400).send(err);
+    }
+});
+
 //Handling POST Request
 router.post("/",verify, async (req, res) => {
     // console.log(req.body);
@@ -71,7 +113,6 @@ router.get("/search",verify, async (req, res) => {
     }
 });
 
-// handling search keyword (Order Id)
 router.get("/:_id",async(req, res)=>{
     try{
         const OrderId = req.params._id;

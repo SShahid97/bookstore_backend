@@ -23,6 +23,24 @@ router.post("/",verify, async (req, res) => {
 
 });
 
+//Checking if item is already in wishlist
+router.get("/added", verify, async (req,res)=>{
+    try{
+        // console.log(req.query);
+        const bookId = req.query.book_id;
+        const userId = req.query.user_id;
+        const itemReturned = await Wishlist.find({ book_id: bookId, user_id:userId  });
+        if(itemReturned.length === 0){
+            res.status(204).send();
+        }else{
+            res.status(200).send(itemReturned[0]);
+        }
+        // console.log(reviewReturned);
+    }catch(err){
+        res.status(400).send(err);
+    }
+})
+
 // verify,
 //Handling GET Request for individual based on id
 router.get("/:_id", verify, async (req, res) => {

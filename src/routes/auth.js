@@ -19,6 +19,23 @@ router.get("/",verify, async (req, res) => {
         res.status(400).send(err);
     }
 });
+router.get("/:_id",verify, async (req, res) => {
+    try {
+        let userId=req.params._id;
+        const user = await User.findById(userId);  //find all
+        if(user!= null){
+            let returnedUser = {
+                name:user.name,
+                email:user.email
+            }
+            res.send(returnedUser);
+        }else{
+            res.status(204).send();
+        }
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
 
 // Register Route
 router.post("/register", async(req, res)=>{
@@ -125,25 +142,69 @@ router.post("/verifypassword",verify,async(req,res)=>{
 });
 
 router.patch("/:_id",  async(req,res)=>{
-    try{
-        const _id = req.params._id;
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await  bcrypt.hash(req.body.password, salt);
-        const updatedPassword = await User.findByIdAndUpdate(_id,{
-            password:hashedPassword
-        },{ 
-             new:true
-        });
-        if(updatedPassword){
-            console.log(updatedPassword);
-             res.send({message:"Password Changed Successfully"});
-        }else{
-            res.status(204).send();
+    if(req.body.password){
+        console.log("yess password");
+        try{
+            const _id = req.params._id;
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await  bcrypt.hash(req.body.password, salt);
+            const updatedPassword = await User.findByIdAndUpdate(_id,{
+                password:hashedPassword
+            },{ 
+                 new:true
+            });
+            if(updatedPassword){
+                // console.log(updatedPassword);
+                 res.send({message:"Password Changed Successfully"});
+            }else{
+                res.status(204).send();
+            }
+        }catch(err){
+            return err;
         }
-    }catch(err){
-        return err;
+    }else if(req.body.name){
+        console.log("yes name");
+         try{
+            const _id = req.params._id;
+            const updatedName = await User.findByIdAndUpdate(_id,req.body,{ 
+                 new:true
+            });
+            if(updatedName){
+                // console.log(updatedName);
+                 res.send({message:"Name Changed Successfully"});
+            }else{
+                res.status(204).send();
+            }
+        }catch(err){
+            return err;
+        }
     }
+    
 })
+
+
+// verify email
+router.post("/verifyemail",async(req,res)=>{
+    try{
+         //Checking if the user exists  
+        const returnedUser = await User.findOne({email:req.body.email});
+        console.log(returnedUser);
+        if(returnedUser!==null){
+            const userDetail={
+                _id:returnedUser._id,
+                name:returnedUser.name,
+                email:returnedUser.email,
+            } 
+            res.status(200).send(userDetail)
+        }else if (returnedUser === null){
+            return res.status(204).send();
+        }
+      
+    }catch(err){
+        res.status(400).send(err);
+    }
+});
+
 
 
 module.exports = router;
