@@ -48,7 +48,11 @@ router.patch("/:_id",verify,async (req,res)=>{
         });
         res.send(updateBook);
     }catch(err){
-        res.status(400).send(err);
+        if(err.errors){
+            res.status(400).send(err);
+        }else{
+            res.status(422).send({message:"Book Code Must be Unique"});
+        }
     }
 });
 
@@ -73,7 +77,7 @@ router.get("/", async (req, res) => {
     try {
         let books;
         if (category) {
-            books = await Books.find({ category: category });
+            books = await Books.find({ category: { $regex: category, $options: 'i' } });
             // console.log(books);
             if(books.length > 0){
                 let book_ids=[];
@@ -139,7 +143,8 @@ router.get("/search", async (req, res) => {
             {
                 $or: [{ book_name: { $regex: searched, $options: 'i' } },
                 { book_description: { $regex: searched, $options: 'i' } },
-                { book_author: { $regex: searched, $options: 'i' } }]
+                { book_author: { $regex: searched, $options: 'i' } },
+                { category: { $regex: searched, $options: 'i' } }]
             });
             // console.log(searchedBooks);
             if(searchedBooks.length === 0){
@@ -147,6 +152,84 @@ router.get("/search", async (req, res) => {
             }else {
                 res.send(searchedBooks);
             }
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
+
+router.get("/search_suggestions", async (req, res) => {
+    const searched = req.query.keyWord;
+    // console.log(searched)
+    try {
+            let suggestedResults = [];
+            const searchedBookNames = await Books.find(
+            {
+                book_name: { $regex: searched, $options: 'i' },
+            },
+            {
+                book_author:0,
+                book_image:0,
+                book_description:0,
+                price:0,
+                book_code:0,
+                category:0,
+                discount:0, 
+                createdAt:0,
+                updatedAt:0,
+                __v:0,
+                _id:0
+            });
+            if(searchedBookNames.length > 0){
+                suggestedResults = [...searchedBookNames];     
+                // res.send(searchedBookNames);
+            }
+            const searchedAuthors = await Books.find(
+                {
+                    book_author: { $regex: searched, $options: 'i' } 
+                },
+                {
+                    book_name:0,
+                    book_image:0,
+                    book_description:0,
+                    price:0,
+                    category:0,
+                    book_code:0,
+                    discount:0,
+                    createdAt:0,
+                    updatedAt:0, 
+                    __v:0,
+                    _id:0
+                });
+                if(searchedAuthors.length>0){
+                    suggestedResults = [...suggestedResults, ...searchedAuthors];
+                //    res.send(searchedAuthors);
+                }
+                const searchedCategory = await Books.find(
+                    {
+                        category: { $regex: searched, $options: 'i' },
+                    },
+                    {
+                        book_name:0,
+                        book_author:0,
+                        book_image:0,
+                        book_description:0,
+                        price:0,
+                        book_code:0,
+                        discount:0,
+                        createdAt:0,
+                        updatedAt:0, 
+                        __v:0,
+                        _id:0
+                    });
+                    if(searchedCategory.length>0){
+                        suggestedResults = [...suggestedResults, ...searchedCategory];
+                    }
+
+                    if(suggestedResults.length>0){
+                        res.send(suggestedResults)
+                    }else{
+                        res.status(204).send();
+                    }
     } catch (err) {
         res.status(400).send(err);
     }
