@@ -2,6 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const Books = require("../models/book");
 const Reviews = require("../models/Review");
+const Stocks = require("../models/Stock");
 const verify = require("./verifyToken");
 
 
@@ -78,21 +79,28 @@ router.get("/", async (req, res) => {
         let books;
         if (category) {
             books = await Books.find({ category: { $regex: category, $options: 'i' } });
+        }
+        else {
+            books = await Books.find({});
+        }    
             // console.log(books);
             if(books.length > 0){
                 let book_ids=[];
+                let book_codes = [];
                 books.forEach((book)=>{
                     book_ids.push(String(book._id));
+                    book_codes.push(String(book.book_code));
                 });
-                // console.log(book_ids);
+
                 const reviews = await Reviews.find({ book_id: { $in: book_ids }},
-                    {
-                        user_id:0,
-                        review:0,
-                        date:0, 
-                        __v:0,
-                        _id:0
-                    });
+                {
+                    user_id:0,
+                    review:0,
+                    date:0, 
+                    __v:0,
+                    _id:0
+                });
+                const stocks = await Stocks.find({book_code: { $in:book_codes}});    
                 // console.log(reviews)             
                 for(let i=0; i<books.length; i++){
                     let sum=0;
@@ -112,28 +120,34 @@ router.get("/", async (req, res) => {
                         ratingAvg = Number(ratingAvg); 
                     }
                     books[i].set( "rating",ratingAvg, { strict: false });
+                    for(let j=0; j<stocks.length; j++){
+                        if(books[i].book_code === stocks[j].book_code){
+                            // console.log("Yes");
+                            books[i].set( "stock_details",stocks[j], { strict: false });
+                        }else{
+                            continue;
+                        }
+                    }
                 }
                 res.send(books);
             }else{
                 res.status(204).send();
             }
-        } else {
-            books = await Books.find({});
-            if(books.length>0){
-                res.send(books);
-            }else{
-                res.status(204).send();
-            }
-        }
+        // } else {
+        //     books = await Books.find({});
+        //     if(books.length>0){
+        //         res.send(books);
+        //     }else{
+        //         res.status(204).send();
+        //     }
+        // }
         
     } catch (err) {
         res.status(400).send(err);
     }
 });
 
-const AttachReview = (books)=>{
 
-}
 //Handling GET Request also getting data based on category
 router.get("/search", async (req, res) => {
     const searched = req.query.search;
@@ -199,12 +213,12 @@ router.get("/search_suggestions", async (req, res) => {
                     updatedAt:0, 
                     __v:0,
                     _id:0
-                });
-                if(searchedAuthors.length>0){
-                    suggestedResults = [...suggestedResults, ...searchedAuthors];
-                //    res.send(searchedAuthors);
-                }
-                const searchedCategory = await Books.find(
+            });
+            if(searchedAuthors.length>0){
+                suggestedResults = [...suggestedResults, ...searchedAuthors];
+            //    res.send(searchedAuthors);
+            }
+            const searchedCategory = await Books.find(
                     {
                         category: { $regex: searched, $options: 'i' },
                     },
@@ -220,16 +234,16 @@ router.get("/search_suggestions", async (req, res) => {
                         updatedAt:0, 
                         __v:0,
                         _id:0
-                    });
-                    if(searchedCategory.length>0){
-                        suggestedResults = [...suggestedResults, ...searchedCategory];
-                    }
+            });
+            if(searchedCategory.length>0){
+                suggestedResults = [...suggestedResults, ...searchedCategory];
+            }
 
-                    if(suggestedResults.length>0){
-                        res.send(suggestedResults)
-                    }else{
-                        res.status(204).send();
-                    }
+            if(suggestedResults.length>0){
+                res.send(suggestedResults);
+            }else{
+                res.status(204).send();
+            }
     } catch (err) {
         res.status(400).send(err);
     }

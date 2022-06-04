@@ -26,7 +26,7 @@ const upload = multer({
 exports.uploadImage = upload.single('photo');
 
 exports.upload = (req, res)=>{
-    console.log(req.file);
+    // console.log(req.file);
     res.status(200).json({
         success:"Image Uploaded Sucessfully"
     })
