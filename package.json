@@ -4,11 +4,9 @@
   "description": "This is the Back End for an online Book Store.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.js",
-    "dev": "nodemon src/index.js"
+    "start": "node src/index.js"
   },
-  "author": "Shahid", 
+  "author": "Shahid",
   "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
