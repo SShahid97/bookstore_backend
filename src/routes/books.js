@@ -83,65 +83,13 @@ router.get("/", async (req, res) => {
         else {
             books = await Books.find({});
         }    
-            // console.log(books);
-            if(books.length > 0){
-                let book_ids=[];
-                let book_codes = [];
-                books.forEach((book)=>{
-                    book_ids.push(String(book._id));
-                    book_codes.push(String(book.book_code));
-                });
 
-                const reviews = await Reviews.find({ book_id: { $in: book_ids }},
-                {
-                    user_id:0,
-                    review:0,
-                    date:0, 
-                    __v:0,
-                    _id:0
-                });
-                const stocks = await Stocks.find({book_code: { $in:book_codes}});    
-                // console.log(reviews)             
-                for(let i=0; i<books.length; i++){
-                    let sum=0;
-                    let review_count=0;
-                    for(let j=0; j<reviews.length; j++){
-                        if(books[i]._id == reviews[j].book_id){
-                            sum=sum+reviews[j].rating;
-                            review_count++;
-                        }else{
-                            continue;
-                        }
-                    }
-                    let ratingAvg=0;
-                    if(sum != 0){
-                        ratingAvg=sum/review_count;
-                        ratingAvg = ratingAvg.toFixed(1);
-                        ratingAvg = Number(ratingAvg); 
-                    }
-                    books[i].set( "rating",ratingAvg, { strict: false });
-                    for(let j=0; j<stocks.length; j++){
-                        if(books[i].book_code === stocks[j].book_code){
-                            // console.log("Yes");
-                            books[i].set( "stock_details",stocks[j], { strict: false });
-                        }else{
-                            continue;
-                        }
-                    }
-                }
-                res.send(books);
-            }else{
-                res.status(204).send();
-            }
-        // } else {
-        //     books = await Books.find({});
-        //     if(books.length>0){
-        //         res.send(books);
-        //     }else{
-        //         res.status(204).send();
-        //     }
-        // }
-        
+        if(books.length > 0){
+            const updatedBooks = await addOtherInfo(books);
+            res.send(updatedBooks);    
+        }else{
+            res.status(204).send();
+        }
     } catch (err) {
         res.status(400).send(err);
     }
@@ -153,23 +101,72 @@ router.get("/search", async (req, res) => {
     const searched = req.query.search;
     // console.log(searched)
     try {
-        const searchedBooks = await Books.find(
-            {
-                $or: [{ book_name: { $regex: searched, $options: 'i' } },
-                { book_description: { $regex: searched, $options: 'i' } },
-                { book_author: { $regex: searched, $options: 'i' } },
-                { category: { $regex: searched, $options: 'i' } }]
-            });
+        const books = await Books.find(
+        {
+            $or: [{ book_name: { $regex: searched, $options: 'i' } },
+            { book_description: { $regex: searched, $options: 'i' } },
+            { book_author: { $regex: searched, $options: 'i' } },
+            { category: { $regex: searched, $options: 'i' } }]
+        });
             // console.log(searchedBooks);
-            if(searchedBooks.length === 0){
-                res.status(204).send();
-            }else {
-                res.send(searchedBooks);
-            }
+        if(books.length > 0){
+            const updatedBooks = await addOtherInfo(books);
+            res.send(updatedBooks);
+        }else {
+            res.status(204).send();
+        }
     } catch (err) {
         res.status(400).send(err);
     }
 });
+
+const addOtherInfo = async(books)=>{
+    let book_ids=[];
+    let book_codes = [];
+    books.forEach((book)=>{
+        book_ids.push(String(book._id));
+        book_codes.push(String(book.book_code));
+    });
+
+    const reviews = await Reviews.find({ book_id: { $in: book_ids }},
+    {
+        user_id:0,
+        review:0,
+        date:0, 
+        __v:0,
+        _id:0
+    });
+    const stocks = await Stocks.find({book_code: { $in:book_codes}});    
+    // console.log(reviews)             
+    for(let i=0; i<books.length; i++){
+        let sum=0;
+        let review_count=0;
+        for(let j=0; j<reviews.length; j++){
+            if(books[i]._id == reviews[j].book_id){
+                sum=sum+reviews[j].rating;
+                review_count++;
+            }else{
+                continue;
+            }
+        }
+        let ratingAvg=0;
+        if(sum != 0){
+            ratingAvg=sum/review_count;
+            ratingAvg = ratingAvg.toFixed(1);
+            ratingAvg = Number(ratingAvg); 
+        }
+        books[i].set( "rating",ratingAvg, { strict: false });
+        for(let j=0; j<stocks.length; j++){
+            if(books[i].book_code === stocks[j].book_code){
+                // console.log("Yes");
+                books[i].set( "stock_details",stocks[j], { strict: false });
+            }else{
+                continue;
+            }
+        }
+    }
+    return books;
+}
 
 router.get("/search_suggestions", async (req, res) => {
     const searched = req.query.keyWord;

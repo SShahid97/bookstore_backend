@@ -72,7 +72,7 @@ router.post("/",verify, async (req, res) => {
 router.get("/search",verify, async (req, res) => {
     try {
         const userId = req.query.user_id;
-        console.log(userId);
+        // console.log(userId);
         const returnedOrders = await Order.find({user_id:userId}).sort({date:-1});
         // console.log(returnedOrders);
         if(returnedOrders.length>0){

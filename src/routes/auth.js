@@ -97,6 +97,7 @@ router.post("/login",async(req,res)=>{
         _id:user._id,
         name:user.name,
         email :user.email,
+        profile_pic:user.profile_pic,
         role:user.role
     }
     // setting token in header
@@ -142,10 +143,10 @@ router.post("/verifypassword",verify,async(req,res)=>{
 });
 
 router.patch("/:_id",  async(req,res)=>{
+    const _id = req.params._id;
     if(req.body.password){
         console.log("yess password");
         try{
-            const _id = req.params._id;
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await  bcrypt.hash(req.body.password, salt);
             const updatedPassword = await User.findByIdAndUpdate(_id,{
@@ -154,6 +155,7 @@ router.patch("/:_id",  async(req,res)=>{
                  new:true
             });
             if(updatedPassword){
+                
                 // console.log(updatedPassword);
                  res.send({message:"Password Changed Successfully"});
             }else{
@@ -165,13 +167,27 @@ router.patch("/:_id",  async(req,res)=>{
     }else if(req.body.name){
         console.log("yes name");
          try{
-            const _id = req.params._id;
             const updatedName = await User.findByIdAndUpdate(_id,req.body,{ 
                  new:true
             });
             if(updatedName){
                 // console.log(updatedName);
                  res.send({message:"Name Changed Successfully"});
+            }else{
+                res.status(204).send();
+            }
+        }catch(err){
+            return err;
+        }
+    }else if(req.body.profile_pic){
+        console.log("yes profile pic");
+         try{
+            const updatedUser = await User.findByIdAndUpdate(_id,req.body,{ 
+                 new:true
+            });
+            if(updatedUser){
+                // console.log(updatedUser);
+                 res.send({message:"Profile pic name added successfully"});
             }else{
                 res.status(204).send();
             }

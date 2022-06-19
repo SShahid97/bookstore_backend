@@ -20,6 +20,9 @@ const userSchema = new mongoose.Schema({
         min:6,
         max:1024
     },
+    profile_pic:{
+        type:String
+    },
     role:{
         type:String,
         default:"user",
